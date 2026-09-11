@@ -1,0 +1,49 @@
+--- a/main/boards/guition/jc8048w550c/guition_jc8048w550c.cc
++++ b/main/boards/guition/jc8048w550c/guition_jc8048w550c.cc
+@@ -130,6 +130,45 @@
+         lv_obj_set_style_text_color(dashboard_network_label_, kDashboardCyan, 0);
+         lv_obj_align(dashboard_network_label_, LV_ALIGN_TOP_MID, -112, 32);
+ 
++        auto wifi_config_button = lv_obj_create(standby_dashboard_);
++        lv_obj_set_size(wifi_config_button, 176, 54);
++        lv_obj_set_style_radius(wifi_config_button, 12, 0);
++        lv_obj_set_style_bg_color(wifi_config_button, kDashboardPanel, 0);
++        lv_obj_set_style_bg_opa(wifi_config_button, LV_OPA_COVER, 0);
++        lv_obj_set_style_border_width(wifi_config_button, 1, 0);
++        lv_obj_set_style_border_color(wifi_config_button, kDashboardMutedCyan, 0);
++        lv_obj_set_style_pad_all(wifi_config_button, 0, 0);
++        lv_obj_remove_flag(wifi_config_button, LV_OBJ_FLAG_SCROLLABLE);
++        lv_obj_add_flag(wifi_config_button, LV_OBJ_FLAG_CLICKABLE);
++        lv_obj_align(wifi_config_button, LV_ALIGN_TOP_RIGHT, -24, 18);
++
++        auto wifi_config_label = lv_label_create(wifi_config_button);
++        lv_label_set_text(wifi_config_label, "ZMIEN WI-FI");
++        lv_obj_set_style_text_font(wifi_config_label, &BUILTIN_TEXT_FONT, 0);
++        lv_obj_set_style_text_color(wifi_config_label, kDashboardCyan, 0);
++        lv_obj_center(wifi_config_label);
++
++        lv_obj_add_event_cb(
++            wifi_config_button,
++            [](lv_event_t* event) {
++                if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
++                    return;
++                }
++
++                auto* display = static_cast<GuitionTouchDisplay*>(lv_event_get_user_data(event));
++                if (display == nullptr || !display->dashboard_visible_) {
++                    return;
++                }
++
++                // Keep LVGL changes in its own task, then enter Wi-Fi setup from the main task.
++                lv_obj_add_flag(display->standby_dashboard_, LV_OBJ_FLAG_HIDDEN);
++                display->dashboard_visible_ = false;
++                display->idle_started_us_ = -1;
++                Application::GetInstance().Schedule([]() {
++                    static_cast<WifiBoard&>(Board::GetInstance()).EnterWifiConfigMode();
++                });
++            },
++            LV_EVENT_CLICKED, this);
++
+         auto state_label = lv_label_create(standby_dashboard_);
+         lv_label_set_text(state_label, "CZUWANIE");
+         lv_obj_set_style_text_font(state_label, &BUILTIN_TEXT_FONT, 0);

@@ -1,0 +1,15 @@
+{
+    "manufacturer": "guition",
+    "type": "guition-jc8048w550c",
+    "target": "esp32s3",
+    "builds": [
+        {
+            "name": "guition-jc8048w550c-inmp441",
+            "sdkconfig_append": [
+                "CONFIG_BOARD_TYPE_GUITION_JC8048W550C=y",
+                "CONFIG_SPIRAM_FETCH_INSTRUCTIONS=y",
+                "CONFIG_SPIRAM_RODATA=y"
+            ]
+        }
+    ]
+}
